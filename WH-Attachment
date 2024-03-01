@@ -1,0 +1,3 @@
+SELECT   Name, ParentId
+FROM Attachment
+WHERE  ParentId in (select Id from GS_Workflow__c WHERE RecordTypeId = '0126e000001NcgaAAC' )
