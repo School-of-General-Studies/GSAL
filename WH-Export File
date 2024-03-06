@@ -1,0 +1,51 @@
+from pprint import pprint
+import json
+import os
+import requests
+import pandas as pd
+from simple_salesforce import Salesforce, SalesforceLogin, SFType
+
+username='intusergsprod@columbia.edu.uat'
+password='Salesforce@2023'
+security_token='5dZwwfOj6gIf0LtjDccntUba'
+domain='test'
+
+
+session_id, instance = SalesforceLogin(username=username, password=password, security_token=security_token, domain=domain)
+sf = Salesforce(instance=instance, session_id=session_id) 
+
+ 
+querySOQL = """
+           SELECT Id, Name, ParentId, Body 
+           From Attachment 
+           WHERE IsDeleted = false AND Parent.RecordTypeId = '0126e000001NcgaAAC'
+           """
+ 
+response = sf.query(querySOQL)
+lstRecords = response.get('records')
+nextRecordsUrl = response.get('nextRecordsUrl')
+
+while not response.get('done'):
+    response = sf.query_more(nextRecordsUrl, identifier_is_url=True)
+    lstRecords.extend(response.get('records'))
+    nextRecordsUrl = response.get('nextRecordsUrl')
+
+#print (lstRecords)
+df_records = pd.DataFrame(lstRecords)
+
+instance_name = sf.sf_instance
+folder_path = 'C:\Users\yl3627\Download'
+
+for row in df_records.iterrows():
+    record_id = row[1]['ParentId']
+    file_name = row[1]['Name']
+    attachment_url = row[1]['Body']
+
+
+    if not os.path.exists(os.path.join(folder_path, record_id)):
+        os.mkdir(os.path.join(folder_path, record_id))       
+        
+    request = sf.session.get('https://{0}{1}'.format(instance_name, attachment_url), headers=sf.headers)
+    with open(os.path.join(folder_path, record_id, file_name), 'wb') as f:
+        f.write(request.content)
+        f.close()
