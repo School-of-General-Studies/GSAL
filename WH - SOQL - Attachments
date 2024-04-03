@@ -5,4 +5,4 @@
 -- confiramtion Doc 
   SELECT    CreatedDate,  Name, OwnerId, ParentId as [SubmittedFormID] 
   FROM Attachment
-  WHERE  Parent.RecordTypeId = '0126e000001NcgaAAC'  and name like Confirmation_WD%' and IsDeleted = FALSE
+  WHERE  Parent.RecordTypeId = '0126e000001NcgaAAC'  and name like 'Confirmation_WD%' and IsDeleted = FALSE
