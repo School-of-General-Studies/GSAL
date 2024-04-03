@@ -18,7 +18,7 @@ sf = Salesforce(instance=instance, session_id=session_id)
 querySOQL = """
            SELECT Id, Name, ParentId, Body 
            From Attachment 
-           WHERE IsDeleted = false AND Parent.RecordTypeId = '0126e000001NcgaAAC'
+           WHERE IsDeleted = false AND Parent.RecordTypeId = '0126e000001NcgaAAC'  and CreatedDate  = YESTERDAY
            """
 
 response = sf.query(querySOQL)
