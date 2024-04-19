@@ -1,0 +1,3 @@
+ SELECT ContentDocumentId, LinkedEntityId, ContentDocument.Title,ContentDocument.FileExtension
+FROM ContentDocumentLink
+WHERE LinkedEntityId IN (SELECT Id FROM GS_Workflow__c  WHERE RecordTypeId = '0126e000001NcgaAAC' and CreatedDate >= LAST_N_WEEKS:2 ) and IsDeleted = FALSE
