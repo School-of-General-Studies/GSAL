@@ -1,8 +1,9 @@
+# Import necessary modules
 from sf_connection import get_sf_connection
 from simple_salesforce import Salesforce, SalesforceMalformedRequest
 from datetime import datetime
 
-
+# Establish Salesforce connection
 sf = get_sf_connection()
 
 class SalesforceGroupManager:
@@ -13,6 +14,10 @@ class SalesforceGroupManager:
         self.insert_count = 0
 
     def fetch_users(self):
+        """
+        Fetch users who are active and meet the criteria specified by user_field,
+        and are not already members of the specified group.
+        """
         querySOQL = f"""
         SELECT Id
         FROM User
@@ -24,6 +29,9 @@ class SalesforceGroupManager:
         return result['records']
 
     def add_users_to_group(self, users):
+        """
+        Add the fetched users to the specified group.
+        """
         new_records = [{'UserOrGroupId': user['Id'], 'GroupId': self.group_id} for user in users]
         if new_records:
             print(f"Attempting to insert {len(new_records)} users.")
@@ -39,9 +47,15 @@ class SalesforceGroupManager:
                     print(f"An error occurred: {e}")
 
     def process_group_members(self):
+        """
+        Process the group members by fetching users and adding them to the group.
+        """
         users = self.fetch_users()
         if users:
             self.add_users_to_group(users)
         else:
             print("No records to insert.")
         print(f"Records inserted successfully: {self.insert_count}")
+        return {
+            'records_inserted': self.insert_count
+        }
