@@ -1,3 +1,9 @@
+"""
+This script created by Ying Liu on 6/11 
+Goal: to connect to sSAL to add /remove users from the public pools. This is master script and will use add and remove classes
+ 
+"""
+
 # Import necessary modules
 #UAT Connection
 #from sf_connection_uat import get_sf_connection
