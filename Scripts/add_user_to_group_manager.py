@@ -1,9 +1,3 @@
-"""
-This script created by Ying Liu on 6/11 
-Goal: to connect to sSAL to add /remove users from the public pools. This is master script and will use add and remove classes
- 
-"""
-
 # Import necessary modules
 #UAT Connection
 #from sf_connection_uat import get_sf_connection
@@ -62,15 +56,18 @@ def main():
     email_body = (
         "Add/Remove Pools Results:\n"
         f"Group: {user_field1}\n"
-        f"Records inserted successfully: {result1['records_inserted']}\n\n"
+        f"Records inserted successfully: {result1['records_inserted']}\n"
+        f"Records inserted Failed: {result1['records_failed_inserted']}\n\n"
         f"Group: {user_field2}\n"
-        f"Records inserted successfully: {result2['records_inserted']}\n\n"
+        f"Records inserted successfully: {result2['records_inserted']}\n"
+        f"Records inserted Failed: {result2['records_failed_inserted']}\n\n"
         f"Group: {user_field3}\n"
         f"Records removed successfully: {result3['records_Removed']}\n"
+        f"Records removed Failed: {result3['records_failed_Removed']}\n\n"
     )
 
     # Send the email
-    send_email(email_subject, email_body, "yl3627@columbia.edu")  # Replace with the recipient's email address
+    send_email(email_subject, email_body, "gsdevteam@columbia.edu")  # Replace with the recipient's email address
 
 if __name__ == '__main__':
     main()
