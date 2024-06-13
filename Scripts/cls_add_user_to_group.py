@@ -1,63 +1,65 @@
 # Import necessary modules
-from sf_connection import get_sf_connection
+from sf_connection_uat import get_sf_connection
 from simple_salesforce import Salesforce, SalesforceMalformedRequest
 
 # Establish Salesforce connection
 sf = get_sf_connection()
 
-class SalesforceGroupManager:
+class SalesforceRemoveGroupManager:
     def __init__(self, group_id, user_field):
+        """
+        Initialize the SalesforceRemoveGroupManager with group ID and user field.
+        """
         self.group_id = group_id
         self.user_field = user_field
         self.sf = get_sf_connection()
-        self.insert_count = 0
-        self.insert_failed_count = 0
+        self.remove_count = 0
+        self.remove_failed_count=0
 
-    def fetch_users(self):
+    def fetch_groupmenber(self):
         """
-        Fetch users who are active and meet the criteria specified by user_field,
-        and are not already members of the specified group.
+        Fetch members of the group who are active users and do not meet the criteria specified by user_field.
         """
         querySOQL = f"""
         SELECT Id
-        FROM User
-        WHERE IsActive = true AND {self.user_field} = True AND Id NOT IN (
-            SELECT UserOrGroupId FROM GroupMember WHERE GroupId = '{self.group_id}'
+        FROM GroupMember
+        WHERE GroupId = '{self.group_id}' AND UserOrGroupId IN (
+            SELECT ID FROM User WHERE IsActive = true And {self.user_field} = False
         )
         """
         result = self.sf.query(querySOQL)
         return result['records']
 
-    def add_users_to_group(self, users):
+    def remove_users_from_group(self, groupmembers):
         """
-        Add the fetched users to the specified group.
+        Remove the fetched group members from the specified group.
         """
-        new_records = [{'UserOrGroupId': user['Id'], 'GroupId': self.group_id} for user in users]
-        if new_records:
-            print(f"Attempting to insert {len(new_records)} users.")
-            for new_record in new_records:
+        ids_to_delete = [{'ID': groupmember['Id'], 'GroupId': self.group_id} for groupmember in groupmembers]
+        if ids_to_delete:
+            print(f"Attempting to remove {len(ids_to_delete)} users.")
+            for id_to_delete in ids_to_delete:
                 try:
-                    res = self.sf.GroupMember.create(new_record)
+                    res = self.sf.GroupMember.delete(id_to_delete)
                     if 'success' in res and res['success']:
-                        print(f"Record inserted successfully, Id: {res['id']}")
-                        self.insert_count += 1
+                        print(f"Record deleted successfully, Id: {res['id']}")
+                        self.remove_count += 1
                     else:
-                        print(f"Error inserting record: {res.get('errors', 'Unknown error')}")
-                        self.insert_failed_count += 1
+                        print(f"Error deleting record: {res.get('errors', 'Unknown error')}")
+                        self.remove_failed_count += 1
                 except SalesforceMalformedRequest as e:
                     print(f"An error occurred: {e}")
 
-    def process_group_members(self):
+    def process_group_members_remove(self):
         """
-        Process the group members by fetching users and adding them to the group.
+        Process the group members by fetching them and removing them from the group.
         """
-        users = self.fetch_users()
-        if users:
-            self.add_users_to_group(users)
+        groupmembers = self.fetch_groupmenber()
+        if groupmembers:
+            self.remove_users_from_group(groupmembers)
         else:
-            print("No records to insert.")
-        print(f"Records inserted successfully: {self.insert_count}")
+            print("No records to delete.")
+        print(f"Records removed successfully: {self.remove_count}")
         return {
-            'records_inserted': self.insert_count,
-            'records_failed_inserted': self.insert_failed_count
+            'records_Removed': self.remove_count,
+            'records_failed_Removed': self.remove_failed_count
         }
