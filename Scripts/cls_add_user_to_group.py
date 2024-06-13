@@ -1,7 +1,6 @@
 # Import necessary modules
 from sf_connection import get_sf_connection
 from simple_salesforce import Salesforce, SalesforceMalformedRequest
-from datetime import datetime
 
 # Establish Salesforce connection
 sf = get_sf_connection()
@@ -12,6 +11,7 @@ class SalesforceGroupManager:
         self.user_field = user_field
         self.sf = get_sf_connection()
         self.insert_count = 0
+        self.insert_failed_count = 0
 
     def fetch_users(self):
         """
@@ -43,6 +43,7 @@ class SalesforceGroupManager:
                         self.insert_count += 1
                     else:
                         print(f"Error inserting record: {res.get('errors', 'Unknown error')}")
+                        self.insert_failed_count += 1
                 except SalesforceMalformedRequest as e:
                     print(f"An error occurred: {e}")
 
@@ -57,5 +58,6 @@ class SalesforceGroupManager:
             print("No records to insert.")
         print(f"Records inserted successfully: {self.insert_count}")
         return {
-            'records_inserted': self.insert_count
+            'records_inserted': self.insert_count,
+            'records_failed_inserted': self.insert_failed_count
         }
